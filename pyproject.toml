@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hrsyncx"
+description = "Synchronization in Hindmarsh-Rose Network with Time-varying Connectivity"
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.10"  # <-- this removes the uv warning
+license = { text = "MIT" }
+authors = [
+    { name = "Alicia KY. Lu", email = "alicialu@mit.edu" },
+]
+dependencies = [
+    "jax",
+    "jax-metal>=0.1.1",
+    "matplotlib",
+    "numpy",
+    "tqdm>=4.67.1",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[dependency-groups]
+dev = [
+    "tqdm>=4.67.1",
+]
