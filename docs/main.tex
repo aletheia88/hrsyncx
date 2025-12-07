@@ -1,0 +1,324 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\input{configs}
+\usepackage{setspace}
+
+\title{Mechanisms of neuronal synchronization in Hindmarsh-Rose network with time-varying connectivity}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  \hfill
+\end{abstract}
+
+\section{Introduction}
+% Synchronization as a subject field
+Synchrony in neuronal networks plays a dual role as a crucial mechanism of
+healthy brain functions underlying cognition and motor coordination, but also a
+potential indicator of pathological states, such as schizophrenia, Parkinson's
+disease and epilepsy \cite{Majhi2025Patterns}. Importantly, synchronous
+neuronal dynamics is an emergent phenomenon arising from the interacting
+dynamics of multiple neuronal and non-neuronal cells, including both pairwise
+interactions and higher-order correlations in neuronal ensembles
+\cite{Majhi2025Patterns}. Past literature suggest various forms of neuronal
+synchrony can be driven by the connectivity mechanisms. The algebraic
+connectivity of a network (i.e., the second minimal eigenvalue of Laplace
+matrix) affects the synchronization of nonlinear networks under diffusive
+coupling \cite{Plotnikov2021Synchronization}. Through spike-timing-dependent
+plasticity (STDP), neurons receiving coherent input could temporally associate
+\cite{Gansel2022Neural}. This project focuses on the synchronization in
+networks of Hindmarsh-Rose systems. 
+
+% HR as a model of synchronization
+The Hindmarsh-Rose (HR) system describes a biological neuron in terms of a nonlinear
+system of third-order differential equation with three variables
+\cite{Hindmarsh1984Model}:
+\begin{align}
+  \dot{x} &= -a x^3 + b x^2 + y - z + I \label{eq:org.x} \\
+  \dot{y} &= c - dx^2 - y \label{eq:org.y} \\ 
+  \dot{z} &= r(s(x+w)-z) \label{eq:org.z}
+\end{align}
+where $x$ represents the dynamics of membrane potential, while $y$ describes
+the dynamics of fast sodium currents and $z$ describes the dynamics of slow
+potassium currents. The Hindmarsh-Rose (HR) model based on pairwise neuronal
+interactions has been used to understand brain network synchronization in
+children with ADHD, which showed that ADHD brains react more rapidly and
+strongly to emotional stimuli \cite{Ansarinasab2023Synchronization}.
+
+My aim here is to explore the synchronizing impact of long-range connections
+under time-varying connectivity via electrical synapses in the HR model. The
+primary goal is to replicate/confirm the core finding from the Ref.
+\cite{Rakshit2021Neuronal} of the dependence of synchronization on coupling
+strength and long-range interaction delays in order to enhance my own
+understanding of the subject.
+
+\section{Method}
+
+\subsection{Hindmarsh-Rose Model}
+
+Suppose a network of $N$ neurons connected through temporal long-range
+electrical synapses. Let $x_i$ represent the membrane potential of the $i$-th
+neuron, $y_i$ represents to the fast $Na^+$ or $K^+$ current, and $z$ represent
+the slow $Ca^+$ current. The network according to the Ref.
+\cite{Rakshit2021Neuronal} can be mathematically expressed as the following:
+\begin{align}
+  \dot{x_i} &= y_i - a x_i^3 + b x_i^2 - z_i + I + \epsilon
+    \sum_{k=1}^{k_\text{max}(t)} \frac{1}{k^{\alpha}} \sum_{j=1}^N
+  \mathcal{A}_{ij}^{[k]}(t) (x_j-x_i) \label{eq:main.x}\\
+  \dot{y_i} &= c - d x_i^2 - y_i \label{eq:main.y} \\
+  \dot{z_i} &= r(s(x_i - x_0) - z_i) \label{eq:main.z}, \ i=1,2,\dots,N.
+\end{align}
+In the equation, $\epsilon$ is the coupling strength, $r$ is the modulator of
+the slow dynamics. The model parameters are chosen as $a=1$, $b=3$, $c=1$,
+$d=5$, $r=0.005$, $I=3.25$, $s=4$ and $x_0 = -1.6$ \cite{Rakshit2021Neuronal}.
+In addition, $\mathcal{A}_{ij}^{[k]}$ represents the adjacency matrix at time
+$t$, characterizing temporal connectivity in the network, where $k$ describes
+the range of interactions. If the $i$th and $j$th nodes are $k$-path connected,
+the element $\mathcal{A}_{ij}^{[k]}(t) = 1$ and $\mathcal{A}_{ij}^{[k]}(t) = 0$
+otherwise. At each time instant $t$, the entire network is rewired with
+probability $p_r$. Hence, the adjacency matrix $\mathcal{A}_{ij}^{[k]}(t)$ for
+each $k$-th path network is time-dependent. The $i$th and $j$th nodes are
+considered $k$-path connected if $\mathcal{A}_{ij}^{[k]}(t)=1$ and $1 \leq k
+\leq k_{max}(t)$, where $k_{max}(t)$ is the diameter of the network at the time
+instance $t$, or the largest shortest-path length between any pair of nodes at
+that time. In other words, the entries of the time-varying $k$-path adjacency
+matrix $\mathcal{A}_{ij}^{[k]}(t)$ for $1 \leq k \leq k_{max}(t)$ are as
+follows:
+\begin{equation}
+  \mathcal{A}_{ij}^{[k]}(t) = 
+  \begin{cases}
+    1, & \text{if distance$(i,j)=k$ at time $t$} \\
+    0, & \text{otherwise}
+  \end{cases}
+\end{equation}
+The effective coupling strength $\epsilon_k = \epsilon / k^{\alpha}$ follows a
+power-law decay, where $\alpha$ controls the decay rate. The underlying network
+connectivity is set to observe a small-world architecture accroding to the
+Watts-Strogatz (WS) graph model. The entire network, with the architecture of a
+ring lattice, is rewired with probability $p_r$. Small $p_r$ implies that the
+network is almost static, while a large value of $p_r$ indicates a rapidly
+varying network. Initially, each node in the network is adjacent with $k_{sw}$
+nearest neighbors on both sides, so the degree of each node is $2k_{sw}$. These
+initial links are then reconnected randomly to chosen distant nodes with
+probability $p_{sw}$. That means, for each edge on the ring, with probability
+$p_{sw}$, we delete that edge and reconnect the source node to a random node,
+avoiding self-loop and duplicating edges. 
+
+\subsection{Synchronizaton Error}
+
+The error of synchronization will be averaged over a sufficiently large time
+duration ($10^5$ time steps based on the Ref. \cite{Rakshit2021Neuronal} as
+follows:
+\begin{equation}
+  E = \left\langle \frac{1}{N-1} \sum_{j=2}^N \sqrt{(x_j-x_i)^2
+  + (y_j-y_i)^2+(z_j-z_i)^2} \right\rangle_t
+\end{equation}
+where $N$ is originally chosen to be 200 HR neurons. The evolution of $E$ is
+examined by varying network and coupling parameters to observe the conditions
+under which synchronization is promoted. In the original paper, phase diagrams
+were created to illustrate the dependence of synchronization on the coupling
+strength $\epsilon$ and the small-world parameter $p_{sw}$ for varying levels
+of $\alpha$ in Eq.~\ref{eq:main.x}, which control the long-range interaction
+decay. 
+
+\section{Experiments}
+% Describe simulation procedures
+The original paper \cite{Rakshit2021Neuronal} simulated 200 HR neurons for $3
+\times 10^5$ time steps. Due to computing resource limit, we either reduced the
+network size to $N=50$ or the number of time steps to $1 \times 10^5$.
+Additionally, we simulated the network in JAX for speed optimization. Equation
+\ref{eq:main.x} \ref{eq:main.y} \ref{eq:main.z} were manually integrated using
+the fourth order Runge-Kutta method over $3 \times 10^5$ time iterations, with
+$dt = 0.01$ as the integration time step. Specifically, the dynamics of $y$ and
+$z$ were simulated as written in Eq.~\ref{eq:main.y} and Eq.~\ref{eq:main.z}.
+Let $F(x,y,z) = y_i - a x_i^3 + b x_i^2 - z_i + I$. And we call
+\[
+  B_{ij}(t) = \sum_{k=1}^{k_{max}(t)} \frac{1}{k^{\alpha}} A_{ij}^{[k]}(t)
+\]
+the effective coupling term. Then we can rewrite Eq.~\ref{eq:main.x} as follows:
+\begin{align}
+  \dot{x}_i &= F(x, y, z) + \epsilon \sum_{k=1}^{k_{max}(t)} \frac{1}{k^{\alpha}} \sum_j A_{ij}^{[k]}(t)(x_j - x_i) \\
+  \dot{x}_i &= F(x, y, z) + \epsilon \sum_j B_{ij} (x_j - x_i) \\
+  \dot{x}_i &= F(x, y, z) + \epsilon \left[ \sum_j B_{ij}x_j - x_i \sum_j B_{ij} \right] \label{eq:sim.x}
+\end{align}
+We use Eq.~\ref{eq:sim.x} to simulate for $x$. For initial conditions, we tried
+randomly drawing from the normal distribution using \texttt{jax.random.normal};
+we also tried sampling from the states of the original HR model (defined by
+Eq.~\ref{eq:org.x}, Eq.~\ref{eq:org.y} and Eq.~\ref{eq:org.z}) after the first
+$50,000$ time steps, where the trajectory is in a regime exhibiting chaotic
+attractor dynamics.
+
+Following the Ref. \cite{Rakshit2021Neuronal}, we investigated the
+synchronization error subject to the variation of the parameters $p_{sw}$,
+$p_r$ and $\epsilon$. Interestingly, our simulation resulted very different
+error dynamics, probably due to differences in the length of simulation and
+initial conditions.
+
+\subsubsection{Experiment I: Effect of $\mathbf{\alpha}$ on synchronization}
+
+\paragraph{Fix $\mathbf{p_{sw}=0.1, k_1 = 3, \epsilon=0.5}$, varying $\mathbf{\alpha, p_r}$.}
+Expect to see increasing $p_r$ promotes neuronal synchronization irrespective
+of the chosen values of $\alpha$, though $\alpha$ still significantly affects
+where synchronization emerges. Specifically, the higher the value of $\alpha$,
+the higher the value of $p_r$ required to achieve complete synchronization
+where $E \approx 0$.
+
+\paragraph{Primary Results} We first simulated the network with $N=200$, experimenting
+with different state initializations, either drawing $(x_0, y_0, z_0)$ from
+chaos (Fig.~\ref{fig1:chaos}) or from normal distribution
+(Fig.~\ref{fig1:normal}). Our simulation in Fig~\ref{fig1:pr_vs_E} shows as
+$p_r$ increases, synchronization error decreases and stablizes under both
+initializations, approaching perfect synchrony, which is consistent with our
+anticipation. However, unlike what the Ref.\cite{Rakshit2021Neuronal} claims in
+their paper, the $\alpha$ value does not seem to strongly modulate where
+synchronization occurs. 
+
+\begin{figure}[htbp]
+    \centering
+    % --- left image ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/wrong_wiring/fig1-200N_init-from-chaos.jpg}
+        \caption{Initialize from chaos.} % (a)
+        \label{fig1:chaos}
+    \end{subfigure}
+    \hfill
+    % --- right image ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/wrong_wiring/fig1-200N.jpg}
+        \caption{Initialize from normal distribution.} % (b)
+        \label{fig1:normal}
+    \end{subfigure}
+
+    \caption{Synchronization error $E$ as a function of $p_r$ for different $\alpha$.}
+    \label{fig1:pr_vs_E}
+\end{figure}
+
+\paragraph{Additional Observations} When we reduced the network size to $N=50$
+but increased the stimulation time steps to $5 \times 10^5$, $E$ no longer
+exhibits a decreasing trend. Still we did not see $\alpha$ differentiates the
+synchronization dynamics under the normal distribution initialization.
+
+\begin{figure}[htbp]
+    \centering
+    % --- left image ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/wrong_wiring/fig1-50N.jpg}
+        \caption{Network simulation with $N=50$, $T=5000$, $dt=0.01$.} % (a)
+        \label{fig1.1:50N}
+    \end{subfigure}
+    \hfill
+    % --- right image ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/wrong_wiring/fig1-200N-100T.jpg}
+        \caption{Network simulation with $N=200$, $T=100$, $dt=0.01$.} % (b)
+        \label{fig1.1:100T}
+    \end{subfigure}
+
+    \caption{Synchronization error $E$ as a function of $p_r$ for different $\alpha$.}
+    \label{fig1.1:pr_vs_E}
+\end{figure}
+
+\subsubsection{Experiment II: Effect of $\mathbf{\epsilon}$ on synchronization}
+
+\paragraph{Fix $\mathbf{\alpha=2.5, k_{sw}=3, p_{sw}=0.1}$, varying $\mathbf{\epsilon, p_r}$.}
+Expect to see an increasing $p_r$ favors synchrony. In constrast to the effect
+of $\alpha$ on synchronization, here we expect to observe increasing values of
+$\epsilon$ enhances the appearance of neuronal synchrony.
+
+\paragraph{Primary Results} We simulated an HR network of size $N=200$ for $1
+\times 10^5$ time steps starting from an initial state randomly sampled from
+trajectory in a chaotic regime according to the classic HR model. The effect of
+$p_r$ is consistent with our expectation: higher $p_r$ values lead to lower
+$E$, because as the network wiring switches more rapidly, the neurons get the
+opportunity of interacting with the otherwise-noninteracting neurons
+\cite{Rakshit2021Neuronal}. But we still do not see an obvious pattern in how
+the network modulation parameters affect synchronization, unlike what the Ref.
+\cite{Rakshit2021Neuronal} predicted. At this point, we think it is reasonable
+to suspect that our simulation may have some critical difference with the
+original HR network described. We will delve into this in the Discussion section.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.7\linewidth]{figures/wrong_wiring/fig2-200N_init-from-chaos.jpg}
+  \caption{Synchronization error $E$ as a function of $p_r$ for different $\epsilon$}
+  \label{fig2:pr_vs_E}
+\end{figure}
+
+\section{Discussion}
+
+After scrutinizing over our code, we found one minor but critical mistake in
+our implementation of the canonical Watts-Strogatz (WS) graph model, which the
+original paper \cite{Rakshit2021Neuronal} unfortunately does not describe in
+sufficient detail. In the canonical WS model for an undirected graph, the
+adjacency (or connectivity) matrix starts from a regular ring lattice, where
+each node $i$ is connected to its $k$ nearest neighbors. For each edge $(i, j)$
+in some ordered subset, with probability $p_{sw}$, it gets rewired according to
+the following rules: (1) remove edge $(i, j)$; (2) choose a new node $j'$
+uniformly at random from nodes not equal to node $i$ and not already connected
+to $i$; (3) add edge $(i, j')$. Under this algorithm, the number of edges and
+the degree of every node are \emph{always preserved} (plus, there are no
+self-loops or multi-edges). In our implementation, when updating the
+connectivity of an existing edge with probability $p_{sw}$, we failed to put
+any constraint on where the new edges could be drawn from in addition to
+inhibiting self-loops. Suppose there are $N$ nodes in the network. As a result,
+the new node $j'$ can be any node $0, \dots, N-1$. If $j'=i$, we would skip
+adding any new edge (i.e., the original edge is removed and \textbf{not
+replaced}), which leads to decreasing the total edge count in the graph, thus
+changing the degree of the node. If $j'$ is already a neighor of $i$, then we
+would remove edge $(i, j)$ and "new" an edge that already exists, which
+effectively results in loosing one edge and decreasing the degree of both $i$
+and $j$. Therefore, the degree distribution is slightly changing over time. To
+fix this, we instead chose the new node $j'$ uniformly from the set $\{ 0,
+\dots, N-1\} \ (\{i\} \cup \text{neighbors}(i))$.
+
+We re-ran experiment I to explore the effect of $\alpha$ on synchronization.
+Previously with the erroneous implementation of the WS graph model, we did not
+observe $\alpha$ modulating when network synchronization occurs, and the
+network never achieved perfect synchrony (i.e., $E\approx0$) with any of the
+$(p_r, \alpha)$ combinations we tried. Initializing a network with $N=200$ and
+simulated for $1 \times 10^5$ iterations yielded an oscillating $E \approx 2.3$
+for all $\alpha's$ as we increased $p_r$. We first simulated a network with
+$N=50$ for $5 \times 10^5$ iterations, initialized from
+\texttt{jax.random.normal}. We found exactly what the Ref.
+\cite{Rakshit2021Neuronal} concluded: higher $\alpha$ resulted in higher
+synchronization error; in addition, the network with only 50 HR neurons were
+able to achieve $E\approx 0.08$, a significant reduction from the previous
+$E\approx2.3$. 
+
+\begin{figure}[htbp]
+    \centering
+    % --- left image ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/fig1-50N_noskip.jpg}
+        \caption{Network re-simulation with $N=50$, $T=5000$, $dt=0.01$.} % (a)
+        \label{fig3:50N_noskip}
+    \end{subfigure}
+    \hfill
+    % --- right image ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/fig1-50N_skip.jpg}
+        \caption{Zooming in on Fig.~\ref{fig3:50N_noskip}, skipping the first $p_r$.} % (b)
+        \label{fig3:50N_skip}
+    \end{subfigure}
+
+    \caption{Synchronization error $E$ as a function of $p_r$ for different $\alpha$.}
+    \label{fig3:pr_vs_E}
+\end{figure}
+
+\section{Appendix}
+
+\clearpage
+{
+\small
+\bibliographystyle{apalike}
+\bibliography{references}
+}
+
+\end{document}
