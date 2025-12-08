@@ -9,7 +9,24 @@
 \maketitle
 
 \begin{abstract}
-  \hfill
+This project investigates how time-varying long-range connectivity shapes
+neuronal synchronization in a network of Hindmarsh--Rose (HR) model neurons
+coupled via electrical synapses on a small-world Watts--Strogatz graph. Using a
+fourth-order Runge-Kutta integrator implemented in JAX, we simulate networks of
+$N=50$ or $N=200$ HR neurons for up to $5\times 10^5$ time steps while
+systematically varying the rewiring probability $p_r$, the power-law decay
+exponent $\alpha$ governing long-range interactions, and the coupling strength
+$\varepsilon$. Synchrony is quantified by a time-averaged Euclidean distance
+between neuronal state vectors. After identifying and correcting a subtle
+implementation error in the Watts--Strogatz rewiring algorithm, our simulations
+reproduce the key qualitative findings of Rakshit et al.: increasing $p_r$
+robustly promotes synchrony, larger $\alpha$ (stronger suppression of
+long-range couplings) hinders or delays global synchronization, and stronger
+$\varepsilon$ facilitates near-complete synchrony with errors as low as $E
+\approx 0.03$. These results highlight how dynamic small-world topology and
+long-range interactions jointly control emergent synchronization in HR networks
+and provide a reusable JAX-based framework for exploring synchronization
+mechanisms in more realistic brain-inspired circuits.
 \end{abstract}
 
 \section{Introduction}
@@ -270,11 +287,11 @@ the new node $j'$ can be any node $0, \dots, N-1$. If $j'=i$, we would skip
 adding any new edge (i.e., the original edge is removed and \textbf{not
 replaced}), which leads to decreasing the total edge count in the graph, thus
 changing the degree of the node. If $j'$ is already a neighor of $i$, then we
-would remove edge $(i, j)$ and "new" an edge that already exists, which
+would remove edge $(i, j)$ and add a "new" edge that already exists, which
 effectively results in loosing one edge and decreasing the degree of both $i$
 and $j$. Therefore, the degree distribution is slightly changing over time. To
 fix this, we instead chose the new node $j'$ uniformly from the set $\{ 0,
-\dots, N-1\} \ (\{i\} \cup \text{neighbors}(i))$.
+\dots, N-1\} \ / \ (\{i\} \cup \text{neighbors}(i))$.
 
 We re-ran experiment I to explore the effect of $\alpha$ on synchronization.
 Previously with the erroneous implementation of the WS graph model, we did not
@@ -284,8 +301,8 @@ $(p_r, \alpha)$ combinations we tried. Initializing a network with $N=200$ and
 simulated for $1 \times 10^5$ iterations yielded an oscillating $E \approx 2.3$
 for all $\alpha's$ as we increased $p_r$. We first simulated a network with
 $N=50$ for $5 \times 10^5$ iterations, initialized from
-\texttt{jax.random.normal}. We found exactly what the Ref.
-\cite{Rakshit2021Neuronal} concluded: higher $\alpha$ resulted in higher
+\texttt{jax.random.normal} (Fig.~\ref{fig3:pr_vs_E}). We found exactly what the
+Ref. \cite{Rakshit2021Neuronal} concluded: higher $\alpha$ resulted in higher
 synchronization error; in addition, the network with only 50 HR neurons were
 able to achieve $E\approx 0.08$, a significant reduction from the previous
 $E\approx2.3$. 
@@ -312,7 +329,54 @@ $E\approx2.3$.
     \label{fig3:pr_vs_E}
 \end{figure}
 
+Next, we simulated a larger network with $N=200$ for $1 \times 10^5$
+iterations, initialized from chaos (Fig.~\ref{fig4:pr_vs_E}). With more
+neurons, the network has synchronization error further reduced to
+$E\approx0.03$, achieving almost perfect synchrony, while we still observed
+that increasing $\alpha$ hinders synchrony, just as the Ref.
+\cite{Rakshit2021Neuronal} had shown. 
+
+\begin{figure}[htbp]
+    \centering
+    % --- left image ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/fig1-200N_init-from-chaos_noskip.jpg}
+        \caption{Network re-simulation with $N=200$, $T=1000$, $dt=0.01$.} % (a)
+        \label{fig4:200N_noskip}
+    \end{subfigure}
+    \hfill
+    % --- right image ---
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/fig1-200N_init-from-chaos_skip.jpg}
+        \caption{Zooming in on Fig.~\ref{fig4:200N_noskip}, skipping the first $p_r$.} % (b)
+        \label{fig4:200N_skip}
+    \end{subfigure}
+
+    \caption{Synchronization error $E$ as a function of $p_r$ for different $\alpha$.}
+    \label{fig4:pr_vs_E}
+\end{figure}
+
+Experiment II explores the effect of $\epsilon$ on synchronization. The Ref
+\cite{Rakshit2021Neuronal} observed that increasing $\epsilon$ enhances
+synchrony, opposite to the effect of increasing $\alpha$. We simulated a
+network of $N=200$ for $1 \times 10^5$ time steps, initialized from chaos and
+integrated with the fourth order Runge-Kutta as before. Our results beautifully
+agree with this conclusion (Fig.~\ref{fig5:pr_vs_E}). 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.6\linewidth]{figures/fig2-200N_init-from-chaos_skip.jpg}
+  \caption{Synchronization error $E$ as a function of $p_r$ for different $\epsilon$}
+  \label{fig5:pr_vs_E}
+\end{figure}
+
+
 \section{Appendix}
+
+All code, results and figures can be found in
+\url{https://github.com/aletheia88/hrsyncx/tree/main}.
 
 \clearpage
 {
