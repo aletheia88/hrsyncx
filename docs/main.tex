@@ -261,12 +261,14 @@ original HR network described. We will delve into this in the Discussion section
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.7\linewidth]{figures/wrong_wiring/fig2-200N_init-from-chaos.jpg}
+  \includegraphics[width=0.55\linewidth]{figures/wrong_wiring/fig2-200N_init-from-chaos.jpg}
   \caption{Synchronization error $E$ as a function of $p_r$ for different $\epsilon$}
   \label{fig2:pr_vs_E}
 \end{figure}
 
 \section{Discussion}
+
+\subsection{Revisiting Experiment I \& II}
 
 After scrutinizing over our code, we found one minor but critical mistake in
 our implementation of the canonical Watts-Strogatz (WS) graph model, which the
@@ -367,13 +369,44 @@ agree with this conclusion (Fig.~\ref{fig5:pr_vs_E}).
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.6\linewidth]{figures/fig2-200N_init-from-chaos_skip.jpg}
+  \includegraphics[width=0.55\linewidth]{figures/fig2-200N_init-from-chaos_skip.jpg}
   \caption{Synchronization error $E$ as a function of $p_r$ for different $\epsilon$}
   \label{fig5:pr_vs_E}
 \end{figure}
 
+\subsection{Connection to neuroscience and future directions}
+Our study is limited to the impact of specific connectivity parameters in
+hindering or enhancing synchrony in a small network with homogenous neuronal
+units, with their interactions strictly through anatomical, "small-world"
+connections that are updated according to a fixed probability. The simulations
+demonstrate the sensitivity of network synchronization to the time-varying
+connectivity. The degree of each node under the small-world graph topology can
+determine how connectivity parameters modulate neuronal synchrony. The
+"small-world" effect is no news to neuroscience. Supplementing a small fraction
+of long-range connections in the densely connected local neuron networks can
+effectively reduce the synaptic path lengths between distant cell assemblies,
+thus promoting synchronization \cite{Buzsaki2004Neuronal}. The architecture of
+small-world networks keeps the synaptic path length short without excessive
+wiring, especially functionally important for scaling oscillatory networks in
+growing brains \cite{Buzsaki2004Neuronal}. Future, more in-depth projects could
+focus on brain oscillations as alternative mechanisms of synchronization. The
+causes of brain oscillations (e.g., the interaction between inhibitory
+interneurons and principal neurons) should also be further investigated in
+order to bridge the studies of connectivity, dynamics and function in the
+brain.
 
 \section{Appendix}
+
+Fig.~\ref{fig5:supp} shows the dynamics of a single biological neuron in a
+network of size $N=200$ in terms of its membrane potential ($x$), fast ($y$)
+and slow ($z$) ionic currents. 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.55\linewidth]{figures/fig3-200N-neuron8.jpg}
+  \caption{Dynamics of a single neuron with time on the $x$-axis, activity on the $y$-axis.}
+  \label{fig5:supp}
+\end{figure}
 
 All code, results and figures can be found in
 \url{https://github.com/aletheia88/hrsyncx/tree/main}.
